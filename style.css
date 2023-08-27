@@ -10,7 +10,7 @@
             font-family: 'Robot Mono', monospace;
         }
 
-        button.play {
+        button.play, button.play.active {
             position: fixed;
             display: block;
             top: 50%;
@@ -25,6 +25,10 @@
             background-color: #fff;
             border: 2px solid black;
             transition: .2s linear;
+        }
+
+        button.play.disabled {
+            display: none;
         }
 
         button.play:hover {
@@ -119,13 +123,23 @@
             user-select: none;
         }
 
-        div.fraze, div.result {
+        div.fraze, div.result, div.fraze.disabled, div.result.disabled {
             display: none;
             font-size: 30px;
             width: 100%;
             text-align: center;
             margin-top: 100px;
             user-select: none;
+        }
+
+        div.fraze.active, div.result.active {
+            display: block;
+        }
+
+        div.result.game-over {
+            margin-top: 100px;
+            font-size: 100px;
+            text-transform: uppercase;
         }
 
         div.result {

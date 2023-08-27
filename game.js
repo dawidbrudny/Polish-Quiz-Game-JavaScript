@@ -65,7 +65,7 @@ let selectedChar = '';
 let goodLetter = false;
 let wins = 0;
 let losses = 0;
-let newGame = false;
+let playGame = false;
 
 // FRAZES LIST AT THE BEGINNING (EMPTY LIST)
 frazes.forEach(item => {
@@ -104,6 +104,7 @@ const timeLapse = () => {
         miliseconds = 0;
         seconds++;
     }
+    // Time counting in text content (yourTime)
     yourTime.textContent = `${minutes<10 ? '0'+minutes : minutes}:${seconds<10 ? '0'+seconds : seconds}:${miliseconds<10 ? '0'+(miliseconds).toFixed() :(miliseconds).toFixed()}`;
 }
 // <-
@@ -123,8 +124,10 @@ const showHintProcess = (displayParam, method) => {
     method ? alphabetPanel.classList.add('blur') : alphabetPanel.classList.remove('blur');
 }
 
+// SHOW HINT SECTION
+// -->
 const showHint = () => {
-    if (newGame) {
+    if (playGame) {
         for (i=0; i < frazesSecondArr.length; i++) {
             let frazeFromSecondArr = frazesSecondArr[i];
             if (someFraze.toUpperCase() === frazeFromSecondArr.toUpperCase()) {
@@ -137,50 +140,88 @@ const showHint = () => {
 }
 
 btnHint.addEventListener('click', showHint);
+// <--
 
+// HIDE HINT SECTION
+// -->
 const hideHint = () => showHintProcess('none', false);
 
 btnHideHint.addEventListener('click', hideHint);
+// <--
 
-const continueGame = () => {
-    if (frazes.length === 0) {
-        fraze.style.display = 'none';
-        result.style.display = 'block';
-        result.style.marginTop = '100px';
-        result.style.fontSize = '100px';
-        result.style.textTransform = 'uppercase';
-        result.classList.remove('loss');  
-        result.classList.add('win'); 
-        result.textContent = `Koniec gry`;
-    } else {
-    btnPlay.textContent = 'Gram dalej';
-    btnPlay.style.display = 'block';
-    fraze.textContent = someFraze;
-    if (losses === 5) {
-    result.style.display = 'block';   
-    result.classList.remove('win');  
-    result.classList.add('loss');  
-    result.textContent = `Niestety nie udało się...`;
-    } else {
-    result.style.display = 'block';   
-    result.classList.remove('loss');  
-    result.classList.add('win');  
-    result.textContent = `Gratulacje! Udało ci się :)`;
-    }
+// GAMEPLAY RESULT PROCESS SECTION
+// -->
+const gameOverProcess = (item1, item2) => {
+    // Fraze
+    item1.classList.remove('active');
+    item1.classList.add('disabled');
+
+    // Result
+    item2.classList.add('active');
+    item2.classList.add('game-over');
+
+    // Game Over Text Information
+    item2.textContent = `koniec gry`;
+}
+
+const continueToPlay = (button, item1, item2) => {
+    button.classList.remove('disabled');
+    button.classList.add('active');
+
+    button.textContent = 'gram dalej';
+
+    // Fraze and SomeFraze - Actual fraze text information
+    item1.textContent = item2;
+}
+
+const winOrLoss = (item, mistakes) => {
+    // item = result, mistakes = losses
+    item.classList.remove('disabled');
+    item.classList.add('active');
+
+    if (mistakes === 5) { // If you made 5 mistakes
+        item.classList.remove('win');  
+        item.classList.add('loss');
+        item.textContent = 'Niestety nie udało się...';
+    } else { // If you guessed you won
+        item.classList.remove('loss');  
+        item.classList.add('win');  
+        item.textContent = `Gratulacje! Udało ci się :)`;
     }
 }
-// <-
+
+
+const gameplayResult = () => {
+    if (frazes.length === 0) {
+        gameOverProcess(fraze, result); // Finished game
+    } else {
+        continueToPlay(btnPlay, fraze, someFraze); // Continue Game
+    }
+    winOrLoss(result, losses) // Win Process if you guessed or Loss Process if you made 5 mistakes
+}
+// <--
 // ------------------------------
 
 
-const startGame = () => {
-    interval = setInterval(timeLapse, 10);
-    newGame = true;
+// Playing game process Section
+// -->
+const playGameProcess = () => {
 
-    btnPlay.style.display = 'none';
-    result.style.display = 'none';
+    // START GAME
+    interval = setInterval(timeLapse, 10);
+    playGame = true;
+
+    btnPlay.classList.remove('active');
+    btnPlay.classList.add('disabled');
+
+    result.classList.remove('active');
+    result.classList.remove('disabled');
+
     frazesList.style.display = 'none';
-    fraze.style.display = 'block';
+
+    fraze.classList.remove('disabled');
+    fraze.classList.add('active');
+
     yourLosses.style.display = 'block';
     alphabetPanel.style.display = 'flex';
 
@@ -242,7 +283,7 @@ const startGame = () => {
 
         if (wins === someFraze.length) {
             clearInterval(interval);
-            newGame = false;
+            playGame = false;
             gameDataset.yourFrazes++;
             gameData.querySelector('p.yourFrazes>span').textContent = `${gameDataset.yourFrazes}/${frazesSecondArr.length}`;
             yourLosses.style.display = 'none';
@@ -258,14 +299,14 @@ const startGame = () => {
 
             frazes.splice(index, 1);
 
-            continueGame();
+            gameplayResult();
             ciphertext = '';
             
         }
             
         if (losses === 5) {
             clearInterval(interval);
-            newGame = false;
+            playGame = false;
             fraze.textContent = someFraze;
             yourLosses.style.display = 'none';
             alphabetPanel.style.display = 'none';
@@ -282,7 +323,7 @@ const startGame = () => {
     
             frazes.splice(index, 1);
 
-            continueGame();
+            gameplayResult();
             ciphertext = '';
         }
         
@@ -290,7 +331,8 @@ const startGame = () => {
     }))
 }
 
-btnPlay.addEventListener('click', startGame);
+btnPlay.addEventListener('click', playGameProcess);
+// <--
 
 String.prototype.setChar = function(place, char)
     {
