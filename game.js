@@ -291,6 +291,8 @@ const frazeGenerator = () => {
 }
 // <-
 
+// CHECKING WIN OR LOSS FUNCTION
+// -->
 const checkWinOrLossFunc = () => {
     // WIN / VICTORY PROCESS
     // ->
@@ -320,8 +322,9 @@ const checkWinOrLossFunc = () => {
         gameplayResult();
         clearFrazesAndCipherText();
     }
+    // <-
 }
-// <-
+// <--
 
 // CORRECT OR INCORRECT LETTER FUNCTION
 // ->
