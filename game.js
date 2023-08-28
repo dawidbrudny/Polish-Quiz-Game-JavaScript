@@ -57,13 +57,13 @@ const modalWrap = document.querySelector('div.modal-wrap');
 const modal = document.querySelector('div.modal');
 
 // DEAFAULT VARIABLES
-let index = '';
+let index = 0;
 let frazeAfterGenerating = '';
-let someFraze = '';
-let ciphertext = '';
+let frazeAfterGeneratingToUpperCase = '';
+let cipherText = '';
 let selectedChar = '';
-let goodLetter = false;
-let wins = 0;
+let correctLetter = false;
+let correctLettersCounter = 0;
 let losses = 0;
 let playGame = false;
 
@@ -130,7 +130,7 @@ const showHint = () => {
     if (playGame) {
         for (i=0; i < frazesSecondArr.length; i++) {
             let frazeFromSecondArr = frazesSecondArr[i];
-            if (someFraze.toUpperCase() === frazeFromSecondArr.toUpperCase()) {
+            if (frazeAfterGeneratingToUpperCase.toUpperCase() === frazeFromSecondArr.toUpperCase()) {
                 modal.querySelector('p').textContent = hintsArr[i];
             }
         }
@@ -146,6 +146,7 @@ btnHint.addEventListener('click', showHint);
 // -->
 const hideHint = () => showHintProcess('none', false);
 
+// BUTTON HINT CLICK LISTENER
 btnHideHint.addEventListener('click', hideHint);
 // <--
 
@@ -165,6 +166,7 @@ const gameOverProcess = (item1, item2) => {
 }
 
 const continueToPlay = (button, item1, item2) => {
+    // Button Play Again
     button.classList.remove('disabled');
     button.classList.add('active');
 
@@ -193,158 +195,216 @@ const winOrLoss = (item, mistakes) => {
 
 const gameplayResult = () => {
     if (frazes.length === 0) {
-        gameOverProcess(fraze, result); // Finished game
+        gameOverProcess(fraze, result); // Finished game text result
     } else {
-        continueToPlay(btnPlay, fraze, someFraze); // Continue Game
+        continueToPlay(btnPlay, fraze, frazeAfterGeneratingToUpperCase); // Continue game text result
     }
-    winOrLoss(result, losses) // Win Process if you guessed or Loss Process if you made 5 mistakes
+    winOrLoss(result, losses) // Win Process if you guessed or Loss Process if you made 5 mistakes - text result
 }
 // <--
 // ------------------------------
 
 
-// Playing game process Section
+// PLAYING GAME PROCESS SECTION
 // -->
-const playGameProcess = () => {
+// ADD FRAZE TO FRAZES LIST
+const addFrazeToList = play => {
+    if (play) {
+        for (let i=0; i<frazesSecondArr.length; i++) {
+            let secondArrFrazeToUpperCase = frazesSecondArr[i].toUpperCase();
+            if (frazeAfterGeneratingToUpperCase === secondArrFrazeToUpperCase) {
+                ul.querySelector(`li:nth-of-type(${i+1})`).textContent = frazeAfterGeneratingToUpperCase;
+                if (losses === 5) ul.querySelector(`li:nth-of-type(${i+1})`).classList.add('loss');
+            }
+        }
+    }
+}
 
-    // START GAME
-    interval = setInterval(timeLapse, 10);
-    playGame = true;
+// ENABLE OR DISABLE ELEMENTS SECTION
+// ->
+const enableOrDisableElements = (active, play) => {
+    // 'active' and 'play' are boolean parameteres in function
+    // true = ENABLE, false = DISABLED 
+    active ? btnPlay.classList.remove('active') : btnPlay.classList.remove('disabled');
+    active ? btnPlay.classList.add('disabled') : btnPlay.classList.add('active');
 
-    btnPlay.classList.remove('active');
-    btnPlay.classList.add('disabled');
+    active ? result.classList.remove('active') : result.classList.remove('disabled');
+    active ? result.classList.add('disabled') : result.classList.add('active');
 
-    result.classList.remove('active');
-    result.classList.remove('disabled');
+    active ? frazesList.classList.remove('active') : frazesList.classList.remove('disabled');
+    active ? frazesList.classList.add('disabled') : frazesList.classList.add('active');
+    
+    // Adding fraze to frazes list after winning or loss
+    addFrazeToList(play);
 
-    frazesList.style.display = 'none';
+    play ? fraze.classList.remove('disabled') : fraze.classList.remove('active');
+    play ? fraze.classList.add('active') : fraze.classList.add('disabled');
 
-    fraze.classList.remove('disabled');
-    fraze.classList.add('active');
+    active ? yourLosses.classList.remove('disabled') : yourLosses.classList.remove('active');
+    active ? yourLosses.classList.add('active') : yourLosses.classList.add('disabled');
 
-    yourLosses.style.display = 'block';
-    alphabetPanel.style.display = 'flex';
+    active ? alphabetPanel.classList.remove('disabled') : alphabetPanel.classList.remove('active');
+    active ? alphabetPanel.classList.add('active') : alphabetPanel.classList.add('disabled');
+    active ? undefined : alphabetPanel.textContent = '';
+}
+// <-
 
-    losses = 0;
-    yourLosses.querySelector('p>span').textContent = losses;
-    wins = 0;
+// SPLICE FRAZES ARRAY AND CLEAR CIPHER TEXT
+const clearFrazesAndCipherText = () => {
+    frazes.splice(index, 1);
+    cipherText = '';
+}
 
+// FRAZE GENERATOR
+// ->
+const frazeGenerator = () => {
+    // Generating some fraze from 'frazes' array
     index = Math.floor(Math.random()*frazes.length);
-
+    // Fraze after generating with UPPERCASE
     frazeAfterGenerating = frazes[index];
-    someFraze = frazeAfterGenerating.toUpperCase();
-    let frazeLength = someFraze.length;
-
-    for (i = 0; i<frazeLength; i++) {
-        if (someFraze[i] === ' ') {
-            ciphertext += ' ';
-            wins++;
-        } else if (someFraze[i] === ',') {
-            ciphertext += ',';
-            wins++;
+    frazeAfterGeneratingToUpperCase = frazeAfterGenerating.toUpperCase();
+    let frazeLength = frazeAfterGeneratingToUpperCase.length;
+    // Generating CIPHER TEXT
+    for (i = 0; i < frazeLength; i++) {
+        if (frazeAfterGeneratingToUpperCase[i] === ' ') {
+            cipherText += ' ';
+            correctLettersCounter++;
+        } else if (frazeAfterGeneratingToUpperCase[i] === ',') {
+            cipherText += ',';
+            correctLettersCounter++;
         } 
         
         else {
-            ciphertext += '-';
+            cipherText += '-';
         }
     }
 
-    fraze.textContent = ciphertext;
+    fraze.textContent = cipherText;
 
-    for (i=0; i<alphabet.length; i++) {
-        const someLetter = document.createElement('div');
-        someLetter.className = 'letter';
-        someLetter.dataset.option = i;
-        someLetter.textContent = alphabet[i].toUpperCase();
-        alphabetPanel.appendChild(someLetter);
+    for (i=0; i < alphabet.length; i++) {
+        const letter = document.createElement('div');
+        letter.className = 'letter';
+        letter.dataset.option = i;
+        letter.textContent = alphabet[i].toUpperCase();
+        alphabetPanel.appendChild(letter);
     }
+}
+// <-
 
+const checkWinOrLossFunc = () => {
+    // WIN / VICTORY PROCESS
+    // ->
+    if (correctLettersCounter === frazeAfterGeneratingToUpperCase.length) {
+        clearInterval(interval);
+        enableOrDisableElements(false, playGame);
+        playGame = false;
+
+        gameDataset.yourFrazes++;
+        // Guessed frazes / All frazes (COUNTER)
+        gameData.querySelector('p.yourFrazes>span').textContent = `${gameDataset.yourFrazes}/${frazesSecondArr.length}`; 
+            
+        gameplayResult();
+        clearFrazesAndCipherText();
+    }
+    // <-
+        
+    // LOSS PROCESS (AFTER 5 MISTAKES)
+    // ->
+    if (losses === 5) {
+        clearInterval(interval);
+        fraze.textContent = frazeAfterGeneratingToUpperCase;
+
+        enableOrDisableElements(false, playGame); // Disable elements
+        playGame = false;
+
+        gameplayResult();
+        clearFrazesAndCipherText();
+    }
+}
+// <-
+
+// CORRECT OR INCORRECT LETTER FUNCTION
+// ->
+function correctOrMistake(letter) {
+    console.log(this);  
+    if (letter === true) {
+        this.classList.add('correct');
+    } else {
+        losses++;
+        gameDataset.allFails++;
+        gameData.querySelector('p.allFails>span').textContent = gameDataset.allFails;
+        yourLosses.querySelector('p>span').textContent = losses;
+        this.classList.add('mistake');
+    }
+}
+// <-
+
+// LETTERS CLICK LISTENER
+// ->
+const letterClickingProcesses = () => {
     const letters = document.querySelectorAll('div.letter');
     
     letters.forEach(letter => letter.addEventListener('click', function() {
+        console.log(this);
         if (this.dataset.click === 'clicked') return alert('To już odkryto.');
+
         selectedChar = Number(this.dataset.option);
         searchSomeLetter();
-        fraze.textContent = ciphertext;
+        fraze.textContent = cipherText;
         this.dataset.click = 'clicked';
 
-        if (goodLetter === true) {
-            this.style.backgroundColor = 'green';
-            this.style.color = 'white';
-        } else {
-            losses++;
-            gameDataset.allFails++;
-            gameData.querySelector('p.allFails>span').textContent = gameDataset.allFails;
-            yourLosses.querySelector('p>span').textContent = losses;
-            this.style.backgroundColor = 'red';
-            this.style.color = 'white';
-        }
+        // Check if clicked letter is correct
+        const correctOrMistakeBind = correctOrMistake.bind(this, correctLetter);
+        correctOrMistakeBind();
+
+        checkWinOrLossFunc();
         
-
-        if (wins === someFraze.length) {
-            clearInterval(interval);
-            playGame = false;
-            gameDataset.yourFrazes++;
-            gameData.querySelector('p.yourFrazes>span').textContent = `${gameDataset.yourFrazes}/${frazesSecondArr.length}`;
-            yourLosses.style.display = 'none';
-            alphabetPanel.style.display = 'none';
-            alphabetPanel.textContent = '';
-            frazesList.style.display = 'block';
-            for (let i=0; i<frazesSecondArr.length; i++) {
-                let secondArrFraze = frazesSecondArr[i];
-                if (someFraze.toUpperCase() === secondArrFraze.toUpperCase()) {
-            ul.querySelector(`li:nth-of-type(${i+1})`).textContent = someFraze;
-                }
-            }
-
-            frazes.splice(index, 1);
-
-            gameplayResult();
-            ciphertext = '';
-            
-        }
-            
-        if (losses === 5) {
-            clearInterval(interval);
-            playGame = false;
-            fraze.textContent = someFraze;
-            yourLosses.style.display = 'none';
-            alphabetPanel.style.display = 'none';
-            alphabetPanel.textContent = '';
-            frazesList.style.display = 'block';
-
-            for (let i=0; i<frazesSecondArr.length; i++) {
-                let secondArrFraze = frazesSecondArr[i];
-                if (someFraze.toUpperCase() === secondArrFraze.toUpperCase()) {
-            ul.querySelector(`li:nth-of-type(${i+1})`).textContent = someFraze;
-            ul.querySelector(`li:nth-of-type(${i+1})`).style.textDecoration = 'line-through';
-                }
-            }
-    
-            frazes.splice(index, 1);
-
-            gameplayResult();
-            ciphertext = '';
-        }
-        
-        goodLetter = false;
+        correctLetter = false;
     }))
 }
+// <-
 
+// PLAYING GAME PROCESS FUNCTION
+// ->
+const playGameProcess = () => {
+    // START GAME
+    interval = setInterval(timeLapse, 10);
+    playGame = true;
+    enableOrDisableElements(true, playGame); // Enable elements
+
+    // Restarting mistakes and correct letters counter to zero
+    losses = 0;
+    yourLosses.querySelector('p>span').textContent = losses;
+    correctLettersCounter = 0;
+
+    frazeGenerator(); // Generating fraze and cipher text...
+
+    letterClickingProcesses(); // Letter click listeners, letters processes and win or loss processes
+}
+
+// BUTTON PLAY CLICK LISTENER
 btnPlay.addEventListener('click', playGameProcess);
+// <-
 // <--
 
-String.prototype.setChar = function(place, char)
-    {
-    return this.substr(0, place) + char + this.substr(place+1);
-    }
+// REPLACING CHAR FUNCTION FOR CIPHER TEXT
+// ->
+String.prototype.setChar = function(place, char) {
+    return this.substr(0, place) + char + this.substr(place + 1);
+}
+// <-
 
-function searchSomeLetter (char = alphabet[selectedChar]) {
-    for (i=0; i<=someFraze.length; i++) {
-        if (char.toUpperCase() === someFraze.charAt(i)) {
-            ciphertext = ciphertext.setChar(i, char.toUpperCase());
-            goodLetter = true;
-            wins++;
+// COMPARING LETTER FROM ALPHABET PANEL TO CHAR FROM GENERATED FRAZE 
+// ->
+function searchSomeLetter (char = alphabet[selectedChar].toUpperCase()) {
+    for (i=0; i <= frazeAfterGeneratingToUpperCase.length; i++) {
+        const charAtFraze = frazeAfterGeneratingToUpperCase.charAt(i);
+
+        if (char === charAtFraze) {
+            cipherText = cipherText.setChar(i, char);
+            correctLetter = true;
+            correctLettersCounter++;
             }
         }
     }
+// <-

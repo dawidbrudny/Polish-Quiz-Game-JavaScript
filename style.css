@@ -97,7 +97,7 @@
             filter: blur(2px);
         }
 
-        div.frazesList {
+        div.frazesList, div.frazesList.active {
             display: block;
             position: fixed;
             top: 50%;
@@ -107,6 +107,10 @@
             text-align: center;
         }
 
+        div.frazesList.disabled {
+            display: none;
+        }
+
         div.frazesList p {
             text-decoration: underline;
         }
@@ -114,6 +118,10 @@
         ul {
             margin-top: 10px;
             list-style: decimal-leading-zero;
+        }
+
+        ul li.loss {
+            text-decoration: line-through;
         }
 
         div.gameDataset {
@@ -150,15 +158,19 @@
             color: royalblue;
         }
 
-        .loss {
+        div.result.loss {
             color: red;
         }
 
-        div.yourLosses {
-            display: none;
+        div.yourLosses, div.yourLosses.active {
+            display: block;
             width: 420px;
             margin: 50px auto;
             user-select: none;
+        }
+
+        div.yourLosses.disabled {
+            display: none;
         }
 
         div.yourLosses p {
@@ -170,7 +182,7 @@
             font-weight: bold;
         }
 
-        div.alphabetPanel {
+        div.alphabetPanel, div.alphabetPanel.active {
             display: flex;
             flex-direction: row;
             flex-wrap: wrap;
@@ -179,6 +191,10 @@
             width: 700px;
             height: 400px;
             margin: -30px auto;
+        }
+
+        div.alphabetPanel.disabled {
+            display: none;
         }
 
         div.letter {
@@ -192,6 +208,16 @@
             cursor: pointer;
             user-select: none;
             transition: .2s linear;
+        }
+
+        div.letter.correct {
+            background-color: green;
+            color: white;
+        }
+        
+        div.letter.mistake {
+            background-color: red;
+            color: white;
         }
 
         div.letter:hover {
