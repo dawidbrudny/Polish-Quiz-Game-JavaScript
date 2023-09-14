@@ -67,12 +67,23 @@ let correctLettersCounter = 0;
 let losses = 0;
 let playGame = false;
 
+// BUTTON HINT HOVER DEPENDING ON PLAY GAME TRUE OR FALSE VALUE
+// ->
+btnHint.addEventListener('mouseover', function() {
+    playGame ? this.classList.add('on-button') : null;
+});
+
+btnHint.addEventListener('mouseout', function() {
+    this.classList.remove('on-button');
+});
+// <-
+
 // FRAZES LIST AT THE BEGINNING (EMPTY LIST)
 frazes.forEach(item => {
     const li = document.createElement('li');
     li.textContent = '';
     ul.appendChild(li);
-})
+});
 
 // SCOREBOARD
 // ->

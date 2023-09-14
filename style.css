@@ -47,7 +47,7 @@
             transition: .2s linear;
         }
 
-        button.hint:hover {
+        button.hint.on-button {
             transform: scale(1.1);
             background-color: rgb(162, 200, 223);
         }
