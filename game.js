@@ -152,14 +152,32 @@ btnHideHint.addEventListener('click', hideHint);
 
 // GAMEPLAY RESULT PROCESS SECTION
 // -->
-const gameOverProcess = (item1, item2) => {
+const gameOverProcess = (item1, item2, item3, item4, item5, item6) => {
     // Fraze
     item1.classList.remove('active');
     item1.classList.add('disabled');
 
     // Result
+    item2.classList.remove('win');
+    item2.classList.remove('loss');
     item2.classList.add('active');
     item2.classList.add('game-over');
+
+    // Button Play
+    item3.classList.remove('active');
+    item3.classList.add('disabled');
+
+    // Alphabet panel
+    item4.classList.remove('active');
+    item4.classList.add('disabled');
+
+    // Frazes list
+    item5.classList.remove('disabled');
+    item5.classList.add('active');
+
+    // Your Losses
+    item6.classList.remove('active');
+    item6.classList.add('disabled');
 
     // Game Over Text Information
     item2.textContent = `koniec gry`;
@@ -169,7 +187,6 @@ const continueToPlay = (button, item1, item2) => {
     // Button Play Again
     button.classList.remove('disabled');
     button.classList.add('active');
-
     button.textContent = 'gram dalej';
 
     // Fraze and SomeFraze - Actual fraze text information
@@ -193,20 +210,6 @@ const winOrLoss = (item, mistakes) => {
 }
 
 
-const gameplayResult = () => {
-    if (frazes.length === 0) {
-        gameOverProcess(fraze, result); // Finished game text result
-    } else {
-        continueToPlay(btnPlay, fraze, frazeAfterGeneratingToUpperCase); // Continue game text result
-    }
-    winOrLoss(result, losses) // Win Process if you guessed or Loss Process if you made 5 mistakes - text result
-}
-// <--
-// ------------------------------
-
-
-// PLAYING GAME PROCESS SECTION
-// -->
 // ADD FRAZE TO FRAZES LIST
 const addFrazeToList = play => {
     if (play) {
@@ -218,8 +221,27 @@ const addFrazeToList = play => {
             }
         }
     }
+
+    playGame = false;
 }
 
+const gameplayResult = () => {
+    if (frazes.length === 0) {
+        gameOverProcess(fraze, result, btnPlay, alphabetPanel, frazesList, yourLosses); // Finished game text result
+        addFrazeToList(playGame);
+    } else {
+        continueToPlay(btnPlay, fraze, frazeAfterGeneratingToUpperCase); // Continue game text result
+        winOrLoss(result, losses); // Win Process if you guessed or Loss Process if you made 5 mistakes - text result
+        enableOrDisableElements(false, playGame);
+        addFrazeToList(playGame);
+    }
+}
+// <--
+// ------------------------------
+
+
+// PLAYING GAME PROCESS SECTION
+// -->
 // ENABLE OR DISABLE ELEMENTS SECTION
 // ->
 const enableOrDisableElements = (active, play) => {
@@ -235,8 +257,6 @@ const enableOrDisableElements = (active, play) => {
     active ? frazesList.classList.add('disabled') : frazesList.classList.add('active');
     
     // Adding fraze to frazes list after winning or loss
-    addFrazeToList(play);
-
     play ? fraze.classList.remove('disabled') : fraze.classList.remove('active');
     play ? fraze.classList.add('active') : fraze.classList.add('disabled');
 
@@ -298,15 +318,12 @@ const checkWinOrLossFunc = () => {
     // ->
     if (correctLettersCounter === frazeAfterGeneratingToUpperCase.length) {
         clearInterval(interval);
-        enableOrDisableElements(false, playGame);
-        playGame = false;
+        clearFrazesAndCipherText();
+        gameplayResult();
 
         gameDataset.yourFrazes++;
         // Guessed frazes / All frazes (COUNTER)
         gameData.querySelector('p.yourFrazes>span').textContent = `${gameDataset.yourFrazes}/${frazesSecondArr.length}`; 
-            
-        gameplayResult();
-        clearFrazesAndCipherText();
     }
     // <-
         
@@ -314,13 +331,12 @@ const checkWinOrLossFunc = () => {
     // ->
     if (losses === 5) {
         clearInterval(interval);
-        fraze.textContent = frazeAfterGeneratingToUpperCase;
-
-        enableOrDisableElements(false, playGame); // Disable elements
-        playGame = false;
-
-        gameplayResult();
         clearFrazesAndCipherText();
+
+        console.log(frazes.length);
+        gameplayResult();
+
+        fraze.textContent = frazeAfterGeneratingToUpperCase;
     }
     // <-
 }
@@ -329,16 +345,18 @@ const checkWinOrLossFunc = () => {
 // CORRECT OR INCORRECT LETTER FUNCTION
 // ->
 function correctOrMistake(letter) {
-    console.log(this);  
     if (letter === true) {
         this.classList.add('correct');
     } else {
         losses++;
+        console.log('błąd')
         gameDataset.allFails++;
         gameData.querySelector('p.allFails>span').textContent = gameDataset.allFails;
         yourLosses.querySelector('p>span').textContent = losses;
         this.classList.add('mistake');
     }
+
+    
 }
 // <-
 
@@ -348,7 +366,6 @@ const letterClickingProcesses = () => {
     const letters = document.querySelectorAll('div.letter');
     
     letters.forEach(letter => letter.addEventListener('click', function() {
-        console.log(this);
         if (this.dataset.click === 'clicked') return alert('To już odkryto.');
 
         selectedChar = Number(this.dataset.option);
@@ -359,9 +376,7 @@ const letterClickingProcesses = () => {
         // Check if clicked letter is correct
         const correctOrMistakeBind = correctOrMistake.bind(this, correctLetter);
         correctOrMistakeBind();
-
         checkWinOrLossFunc();
-        
         correctLetter = false;
     }))
 }
